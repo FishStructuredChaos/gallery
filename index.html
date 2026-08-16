@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#000000">
+    <title>FISH ＜＞＜ GALLERY</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='0' y='14' font-size='14' fill='%2300ff00'%3E%3E%3C%3E%3C/text%3E%3C/svg%3E">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html {
+            overflow-y: scroll;
+            scrollbar-gutter: stable;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            color: #00ff00;
+            min-height: 100vh;
+            padding: 10px 20px 20px 20px;
+            overflow-x: hidden;
+            border: 3px solid #00ff00;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.2),
+                rgba(0,0,0,0.2) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #00ff00; border: 2px solid #000; }
+
+        .container {
+            max-width: 1700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: #000;
+        }
+
+        /* ---------- Tab bar (tabs + overflow dropdown) ---------- */
+        .tab-bar {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            background: #000;
+            border: 2px solid #00ff00;
+            border-top: none;
+            padding: 5px 5px 0 5px;
+        }
+
+        .tabs {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .tab,
+        .more-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #001300;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            border-bottom: none;
+            border-radius: 7px 7px 0 0;
+            padding: 6px 14px 5px 14px;
+            cursor: pointer;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-size: 0.72rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            transition: all 0.1s ease;
+        }
+
+        .tab { flex-shrink: 0; }
+
+        .tab:hover,
+        .more-btn:hover {
+            background: #004d00;
+            color: #00ff00;
+        }
+        .tab.active {
+            background: #00ff00;
+            color: #000;
+        }
+        .tab.dim { opacity: 0.4; }
+        .tab.dim.active { opacity: 1; }
+
+        .tab:focus:not(:focus-visible),
+        .more-btn:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        .tab-name {
+            max-width: 30vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tab-badge { font-size: 0.6rem; }
+
+        .dropdown {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .dd-label {
+            max-width: 25vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dd-arrow { font-size: 0.6rem; flex-shrink: 0; }
+
+        .dd-menu {
+            position: absolute;
+            top: calc(100% + 2px);
+            right: 0;
+            min-width: 240px;
+            max-width: min(85vw, 340px);
+            max-height: 60vh;
+            overflow-y: auto;
+            background: #000;
+            border: 2px solid #00ff00;
+            z-index: 600;
+            display: none;
+        }
+        .dd-menu.open { display: block; }
+
+        .dd-menu::-webkit-scrollbar { width: 8px; }
+        .dd-menu::-webkit-scrollbar-track { background: #001a00; }
+        .dd-menu::-webkit-scrollbar-thumb { background: #00ff00; }
+
+        .dd-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 8px 12px;
+            background: #002600;
+            color: #00ff00;
+            border: none;
+            border-bottom: 1px solid rgba(0,255,0,0.35);
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-size: 0.78rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .dd-item:last-child { border-bottom: none; }
+        .dd-item:hover { background: #00ff00; color: #000; }
+        .dd-item.active { background: #00ff00; color: #000; }
+        .dd-item.dim { opacity: 0.55; }
+
+        .dd-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dd-badge { font-size: 0.6rem; opacity: 0.85; flex-shrink: 0; }
+
+        /* ---------- Address bar ---------- */
+        .address-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #000;
+            border: 2px solid #00ff00;
+            padding: 6px;
+        }
+
+        .addr {
+            flex: 1;
+            min-width: 0;
+        }
+
+        #search {
+            width: 100%;
+            background: #000;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 7px 12px;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        #search::placeholder {
+            color: #00ff00;
+            opacity: 0.5;
+        }
+
+        #search:focus {
+            box-shadow: 0 0 6px rgba(0,255,0,0.4);
+        }
+
+        /* ---------- Page ---------- */
+        .page {
+            background: #000;
+            border: 2px solid #00ff00;
+            border-top: none;
+            padding: 16px 16px 30px 16px;
+        }
+
+        #loading {
+            padding: 6px 0;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .folder-section {
+            background: #000;
+            border: 2px solid #00ff00;
+            padding: 20px 20px 40px 20px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .folder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .folder-header .name {
+            font-size: 1.5rem;
+            color: #00ff00;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .folder-header .count {
+            font-size: 0.9rem;
+            color: #00ff00;
+            opacity: 0.8;
+        }
+
+        .grid {
+            position: relative;
+            --col-min: 180px;
+        }
+        .grid.collapsed { display: none; }
+
+        .thumb {
+            position: absolute;
+            left: 0;
+            top: 0;
+            border: 2px solid #00ff00;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .thumb:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0,255,0,0.3);
+        }
+
+        .thumb img {
+            width: 100%;
+            height: auto;
+            display: block;
+            background-color: #6f6f6f;
+            background-image:
+                linear-gradient(45deg, #2f2f2f 25%, transparent 25%),
+                linear-gradient(-45deg, #2f2f2f 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #2f2f2f 75%),
+                linear-gradient(-45deg, transparent 75%, #2f2f2f 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+        }
+
+        .thumb .loader {
+            position: absolute;
+            color: #00ff00;
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
+
+        .thumb-tag {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            z-index: 2;
+            background: #000;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 2px 6px;
+            font-size: 0.6rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            pointer-events: none;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        .thumb-tag.svg { color: #00ffff; border-color: #00ffff; }
+
+        .folder-section.search-hide { display: none; }
+
+        #error {
+            text-align: center;
+            padding: 40px;
+            color: #ff0000;
+            display: none;
+        }
+        #error.visible { display: block; }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            font-size: 1.2rem;
+            color: #00ff00;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: none;
+        }
+        .no-results.visible { display: block; }
+
+        /* ---------- Status bar ---------- */
+        .status-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            background: #000;
+            border: 2px solid #00ff00;
+            border-top: none;
+            padding: 4px 10px;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ---------- Lightbox ---------- */
+        #lb {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.96);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 64px;
+            touch-action: pan-y pinch-zoom;
+        }
+        #lb.open { display: flex; }
+
+        #lb.framed {
+            position: absolute;
+            inset: auto;
+            left: 0;
+            right: 0;
+            top: 0;
+        }
+        #lb.framed #lb-close,
+        #lb.framed #lb-prev,
+        #lb.framed #lb-next,
+        #lb.framed #lb-info {
+            position: absolute;
+        }
+
+        #lb-img-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #lb-loading {
+            position: absolute;
+            color: #00ff00;
+            font-size: 1.2rem;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            letter-spacing: 1px;
+            display: none;
+            z-index: 1002;
+            pointer-events: none;
+        }
+
+        #lb img {
+            max-width: 100%;
+            max-height: calc(100vh - 110px);
+            object-fit: contain;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+            user-select: none;
+            -webkit-user-drag: none;
+            touch-action: none;
+            will-change: transform;
+            background-color: #6f6f6f;
+            background-image:
+                linear-gradient(45deg, #2f2f2f 25%, transparent 25%),
+                linear-gradient(-45deg, #2f2f2f 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #2f2f2f 75%),
+                linear-gradient(-45deg, transparent 75%, #2f2f2f 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+        }
+        #lb img.shown { opacity: 1; }
+
+        #lb.zoomed #lb-img { cursor: grab; }
+        #lb.zoomed #lb-img:active { cursor: grabbing; }
+
+        #lb-zoom-in,
+        #lb-zoom-out {
+            padding: 4px 12px;
+            background: #000;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            cursor: pointer;
+            font-size: 0.9rem;
+            line-height: 1;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            transition: all 0.1s ease;
+        }
+        #lb-zoom-in:hover,
+        #lb-zoom-out:hover { background: #00ff00; color: #000; }
+
+        #lb-info {
+            position: fixed;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            max-width: calc(100vw - 24px);
+            background: #000;
+            padding: 8px 16px;
+            border: 2px solid #00ff00;
+            z-index: 1001;
+        }
+
+        #lb-name {
+            font-size: 0.75rem;
+            color: #00ff00;
+            text-transform: uppercase;
+            max-width: 38vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #lb-count {
+            font-size: 0.72rem;
+            color: #00ff00;
+            opacity: 0.75;
+            white-space: nowrap;
+        }
+
+        #lb-tag {
+            font-size: 0.65rem;
+            color: #000;
+            background: #00ff00;
+            padding: 2px 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        #lb-tag.svg { background: #00ffff; }
+        #lb-tag:empty { display: none; }
+
+        #lb-dl {
+            padding: 6px 14px;
+            background: #000;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            cursor: pointer;
+            font-size: 0.75rem;
+            text-decoration: none;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.1s ease;
+            white-space: nowrap;
+        }
+        #lb-dl:hover { background: #00ff00; color: #000; }
+
+        #lb-close {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
+            background: #000;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            transition: all 0.1s ease;
+            z-index: 1001;
+        }
+        #lb-close:hover { background: #00ff00; color: #000; }
+
+        #lb-prev, #lb-next {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 46px;
+            height: 46px;
+            background: rgba(0,0,0,0.75);
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            transition: all 0.1s ease;
+            z-index: 1001;
+        }
+        #lb-prev { left: 14px; }
+        #lb-next { right: 14px; }
+        #lb-prev:hover, #lb-next:hover { background: #00ff00; color: #000; }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #000;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.1s ease;
+            z-index: 300;
+            display: none;
+            line-height: 1;
+        }
+        #back-to-top:hover { background: #00ff00; color: #000; }
+        #back-to-top.visible { display: block; }
+
+        button:focus-visible,
+        .thumb:focus-visible,
+        .folder-header:focus-visible,
+        .tab:focus-visible,
+        .more-btn:focus-visible,
+        .dd-item:focus-visible,
+        #search:focus-visible,
+        #lb-dl:focus-visible {
+            outline: 2px solid #00ff00;
+            outline-offset: 2px;
+        }
+
+        @media (min-width: 901px) {
+            body { padding-bottom: 50px; }
+            .status-bar {
+                position: fixed;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: min(1700px, calc(100% - 46px));
+                z-index: 400;
+            }
+            #back-to-top { bottom: 56px; }
+        }
+
+        @media (max-width: 900px) {
+            .tab,
+            .more-btn { padding: 4px 9px 4px 9px; }
+            .tab-name { max-width: 45vw; }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 8px 10px 10px 10px; }
+            .page { padding: 10px 10px 20px 10px; }
+            .grid { --col-min: 120px; }
+            .folder-header { flex-direction: column; align-items: flex-start; }
+            .folder-header .name { font-size: 1.1rem; }
+            .folder-section { padding: 12px 12px 24px 12px; margin-bottom: 16px; }
+            #lb { padding: 8px 44px; }
+            #lb img { max-height: calc(100vh - 96px); }
+            #lb-prev { left: 4px; width: 36px; height: 36px; }
+            #lb-next { right: 4px; width: 36px; height: 36px; }
+            #lb-info { bottom: 8px; padding: 6px 10px; gap: 8px; }
+            #lb-name { max-width: 46vw; font-size: 0.65rem; }
+            #lb-close { top: 8px; right: 8px; width: 34px; height: 34px; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 4px 6px 6px 6px; border-width: 2px; }
+            .tab,
+            .more-btn { padding: 3px 7px 3px 7px; font-size: 0.62rem; border-radius: 5px 5px 0 0; }
+            .tab-badge { font-size: 0.52rem; }
+            .dd-item { font-size: 0.65rem; padding: 6px 10px; }
+            .dd-badge { font-size: 0.55rem; }
+            #search { padding: 6px 10px; font-size: 0.8rem; }
+            .status-bar { font-size: 0.58rem; padding: 3px 8px; }
+            .grid { --col-min: 90px; }
+            .folder-header .name { font-size: 0.9rem; }
+            .folder-header .count { font-size: 0.7rem; }
+            .folder-section { padding: 8px 8px 16px 8px; margin-bottom: 10px; border-width: 1.5px; }
+            .thumb { border-width: 1.5px; }
+            .thumb-tag { top: 3px; left: 3px; padding: 1px 3px; font-size: 0.5rem; border-width: 1px; }
+
+            #lb { padding: 6px 40px; }
+            #lb img { max-height: calc(100vh - 88px); }
+            #lb-prev { left: 2px; width: 32px; height: 32px; font-size: 0.9rem; }
+            #lb-next { right: 2px; width: 32px; height: 32px; font-size: 0.9rem; }
+            #lb-info { bottom: 6px; padding: 4px 8px; gap: 6px; }
+            #lb-name { font-size: 0.55rem; max-width: 40vw; }
+            #lb-count { font-size: 0.55rem; }
+            #lb-zoom-in,
+            #lb-zoom-out { padding: 2px 8px; font-size: 0.8rem; }
+            #lb-dl { padding: 4px 8px; font-size: 0.6rem; }
+            #lb-close { top: 4px; right: 4px; width: 30px; height: 30px; font-size: 0.9rem; }
+            #back-to-top { padding: 6px 12px; font-size: 0.7rem; bottom: 10px; right: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sticky-top">
+            <div class="address-bar">
+                <div class="addr">
+                    <input id="search" type="text" placeholder="🔍 SEARCH IMAGES..." autocomplete="off" aria-label="Search images">
+                </div>
+            </div>
+            <div class="tab-bar" id="tab-bar" role="tablist" aria-label="Folders">
+                <div class="tabs" id="tabs"></div>
+                <div class="dropdown" id="folder-dropdown">
+                    <button class="more-btn" id="dd-btn" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="dd-label">MORE</span>
+                        <span class="dd-arrow" aria-hidden="true">▾</span>
+                    </button>
+                    <div class="dd-menu" id="dd-menu" role="listbox" aria-label="More folders"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page">
+            <div id="loading">▓▒░ LOADING... ░▒▓</div>
+            <div id="gallery">
+                <div id="error" aria-live="polite"></div>
+                <div id="no-results" class="no-results" aria-live="polite">NO IMAGES FOUND</div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <span id="status-right"></span>
+        </div>
+    </div>
+
+    <button id="back-to-top">▲ TOP</button>
+
+    <div id="lb" role="dialog" aria-modal="true" aria-label="Image viewer">
+        <button id="lb-close" aria-label="Close viewer">✕</button>
+        <button id="lb-prev" aria-label="Previous image">◀</button>
+        <button id="lb-next" aria-label="Next image">▶</button>
+        <div id="lb-img-wrap">
+            <div id="lb-loading">LOADING...</div>
+            <img id="lb-img" alt="">
+        </div>
+        <div id="lb-info">
+            <span id="lb-name"></span>
+            <span id="lb-tag"></span>
+            <span id="lb-count"></span>
+            <button id="lb-zoom-out" aria-label="Zoom out">−</button>
+            <button id="lb-zoom-in" aria-label="Zoom in">+</button>
+            <a id="lb-dl" download>DOWNLOAD</a>
+        </div>
+    </div>
+
+    <script src="manifest.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            const $ = id => document.getElementById(id);
+            const gallery = $('gallery');
+            const loading = $('loading');
+            const error = $('error');
+            const searchInput = $('search');
+            const noResults = $('no-results');
+            const lb = $('lb');
+            const lbImg = $('lb-img');
+            const lbImgWrap = $('lb-img-wrap');
+            const lbName = $('lb-name');
+            const lbCount = $('lb-count');
+            const lbTag = $('lb-tag');
+            const lbZoomIn = $('lb-zoom-in');
+            const lbZoomOut = $('lb-zoom-out');
+            const lbLoading = $('lb-loading');
+            const lbDl = $('lb-dl');
+            const lbClose = $('lb-close');
+            const lbPrev = $('lb-prev');
+            const lbNext = $('lb-next');
+            const backToTop = $('back-to-top');
+            const tabsWrap = $('tabs');
+            const dropdown = $('folder-dropdown');
+            const ddBtn = $('dd-btn');
+            const ddMenu = $('dd-menu');
+            const statusRight = $('status-right');
+
+            const enc = p => p.split(/[\\/]/).map(encodeURIComponent).join('/');
+
+            if (window.MANIFEST) {
+                init(window.MANIFEST);
+            } else {
+                fetch('manifest.json?' + Date.now())
+                    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                    .then(init)
+                    .catch(e => {
+                        loading.style.display = 'none';
+                        error.classList.add('visible');
+                        error.textContent = 'FAILED TO LOAD: ' + e.message;
+                    });
+            }
+
+            function init(data) {
+                if (!data.folders || data.folders.length === 0) {
+                    loading.style.display = 'none';
+                    error.classList.add('visible');
+                    error.textContent = 'NO FOLDERS FOUND';
+                    return;
+                }
+
+                function catScore(name) {
+                    const n = name.replace(/^[!~]/, '');
+                    if (/pictures/i.test(n)) return 0;
+                    if (/gif|animated/i.test(n)) return 1;
+                    if (/graphics/i.test(n)) return 2;
+                    return 3;
+                }
+
+                data.folders.sort((a, b) => {
+                    const aBang = a.name.startsWith('!');
+                    const bBang = b.name.startsWith('!');
+                    if (aBang && !bBang) return -1;
+                    if (!aBang && bBang) return 1;
+                    const ac = catScore(a.name), bc = catScore(b.name);
+                    if (ac !== bc) return ac - bc;
+                    const aTilde = a.name.startsWith('~');
+                    const bTilde = b.name.startsWith('~');
+                    if (aTilde && !bTilde) return 1;
+                    if (!aTilde && bTilde) return -1;
+                    return a.name.localeCompare(b.name);
+                });
+
+                const allImgs = [];
+                for (const f of data.folders)
+                    for (const file of f.files)
+                        allImgs.push({ file, folder: f.name, path: f.path });
+
+                loading.style.display = 'none';
+
+                const observer = new IntersectionObserver(entries => {
+                    for (const e of entries) {
+                        if (e.isIntersecting) {
+                            const img = e.target;
+                            img.src = img.dataset.src;
+                            observer.unobserve(img);
+                        }
+                    }
+                }, { rootMargin: '200px' });
+
+                let globalIdx = 0;
+                data.folders.forEach((folder, folderIdx) => {
+                    const sec = document.createElement('section');
+                    sec.className = 'folder-section';
+                    sec.dataset.folder = folder.name;
+
+                    const hdr = document.createElement('div');
+                    hdr.className = 'folder-header';
+                    hdr.setAttribute('role', 'button');
+                    hdr.tabIndex = 0;
+                    hdr.setAttribute('aria-expanded', folderIdx === 0 ? 'true' : 'false');
+
+                    const name = document.createElement('span');
+                    name.className = 'name';
+                    name.textContent = folder.name;
+                    hdr.appendChild(name);
+
+                    const count = document.createElement('span');
+                    count.className = 'count';
+                    count.textContent = folder.files.length + ' IMAGES';
+                    hdr.appendChild(count);
+
+                    hdr.addEventListener('click', toggleCollapse);
+                    hdr.addEventListener('keydown', e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleCollapse.call(hdr);
+                        }
+                    });
+
+                    sec.appendChild(hdr);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'grid';
+                    if (folderIdx !== 0) grid.classList.add('collapsed');
+                    sec.appendChild(grid);
+
+                    folder.files.forEach((file, fileIdx) => {
+                        const idx = globalIdx++;
+                        const useThumb = data.thumbsDir && folder.sizes && folder.sizes[fileIdx] > 102400;
+                        const thumbFile = useThumb ? file.replace(/\.[^.]+$/, '.webp') : file;
+                        const path = (useThumb ? enc(data.thumbsDir) + '/' : '') + enc(folder.path) + '/' + enc(thumbFile);
+                        const origPath = enc(folder.path) + '/' + enc(file);
+
+                        const thumb = document.createElement('div');
+                        thumb.className = 'thumb';
+                        thumb.setAttribute('role', 'button');
+                        thumb.tabIndex = 0;
+                        thumb.setAttribute('aria-label', 'Open ' + file);
+                        thumb.dataset.name = file;
+
+                        const ext = (file.split('.').pop() || '').toLowerCase();
+                        if (ext === 'svg' || ext === 'gif') {
+                            const tag = document.createElement('span');
+                            tag.className = 'thumb-tag ' + ext;
+                            tag.textContent = ext.toUpperCase();
+                            thumb.appendChild(tag);
+                        }
+
+                        const loader = document.createElement('div');
+                        loader.className = 'loader';
+                        loader.textContent = '...';
+                        thumb.appendChild(loader);
+
+                        const img = document.createElement('img');
+                        img.alt = '';
+                        img.decoding = 'async';
+                        img.dataset.src = path;
+                        img.addEventListener('load', () => {
+                            loader.remove();
+                            img.dataset.ratio = img.naturalHeight / img.naturalWidth;
+                            scheduleMasonry();
+                        });
+                        img.addEventListener('error', () => {
+                            if (useThumb && img.src !== origPath) img.src = origPath;
+                            else loader.textContent = '\u26a0';
+                        });
+                        thumb.appendChild(img);
+
+                        observer.observe(img);
+
+                        thumb.addEventListener('click', () => openLb(idx));
+                        thumb.addEventListener('keydown', e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                openLb(idx);
+                            }
+                        });
+
+                        grid.appendChild(thumb);
+                    });
+
+                    gallery.appendChild(sec);
+                });
+
+                function toggleCollapse() {
+                    if (currentFolder) return;
+                    const sec = this.closest('.folder-section');
+                    const grid = sec.querySelector('.grid');
+                    const collapsed = grid.classList.toggle('collapsed');
+                    this.setAttribute('aria-expanded', String(!collapsed));
+                }
+
+                let currentFolder = '';
+                let allActive = true;
+                let preSearchFolder = null;
+
+                function buildTabs() {
+                    const entries = [{ name: '', label: 'ALL', count: allImgs.length }]
+                        .concat(data.folders.map(f => ({ name: f.name, label: f.name, count: f.files.length })));
+
+                    entries.forEach(en => {
+                        const tab = document.createElement('button');
+                        tab.className = 'tab';
+                        tab.setAttribute('role', 'tab');
+                        tab.dataset.folder = en.name;
+
+                        const nm = document.createElement('span');
+                        nm.className = 'tab-name';
+                        nm.textContent = en.label;
+                        tab.appendChild(nm);
+
+                        const bd = document.createElement('span');
+                        bd.className = 'tab-badge';
+                        bd.textContent = en.count;
+                        tab.appendChild(bd);
+
+                        tab.addEventListener('click', () => selectFolder(en.name));
+                        tabsWrap.appendChild(tab);
+
+                        const item = document.createElement('button');
+                        item.className = 'dd-item';
+                        item.setAttribute('role', 'option');
+                        item.dataset.folder = en.name;
+
+                        const inm = document.createElement('span');
+                        inm.className = 'dd-name';
+                        inm.textContent = en.label;
+                        item.appendChild(inm);
+
+                        const ibd = document.createElement('span');
+                        ibd.className = 'dd-badge';
+                        ibd.textContent = en.count;
+                        item.appendChild(ibd);
+
+                        item.addEventListener('click', () => {
+                            closeMenu();
+                            selectFolder(en.name);
+                        });
+                        ddMenu.appendChild(item);
+                    });
+                }
+
+                function openMenu() {
+                    ddMenu.classList.add('open');
+                    ddBtn.setAttribute('aria-expanded', 'true');
+                }
+
+                function closeMenu() {
+                    ddMenu.classList.remove('open');
+                    ddBtn.setAttribute('aria-expanded', 'false');
+                }
+
+                ddBtn.addEventListener('click', () => {
+                    if (ddMenu.classList.contains('open')) closeMenu();
+                    else openMenu();
+                });
+                document.addEventListener('click', e => {
+                    if (!dropdown.contains(e.target)) closeMenu();
+                });
+
+                function updateTabs() {
+                    document.querySelectorAll('.tab, .dd-item').forEach(el => {
+                        const name = el.dataset.folder || '';
+                        const on = name === '' ? allActive : name === currentFolder;
+                        el.classList.toggle('active', on);
+                        el.setAttribute('aria-selected', String(on));
+                    });
+                }
+
+                function layoutTabs() {
+                    const tabs = Array.from(tabsWrap.querySelectorAll('.tab'));
+                    const avail = tabsWrap.clientWidth;
+                    const GAP = 3;
+                    const w = {};
+                    tabs.forEach(t => {
+                        t.style.display = '';
+                        w[t.dataset.folder || ''] = t.offsetWidth + GAP;
+                    });
+
+                    const hidden = new Set();
+                    let used = 0;
+                    tabs.forEach(t => {
+                        const name = t.dataset.folder || '';
+                        used += w[name];
+                        if (used > avail) hidden.add(name);
+                    });
+
+                    if (hidden.has(currentFolder)) {
+                        hidden.delete(currentFolder);
+                        const totalW = () => tabs.reduce((sum, t) => {
+                            const name = t.dataset.folder || '';
+                            return hidden.has(name) ? sum : sum + w[name];
+                        }, 0);
+                        const dropLastVisible = () => {
+                            for (let i = tabs.length - 1; i >= 0; i--) {
+                                const name = tabs[i].dataset.folder || '';
+                                if (name !== currentFolder && !hidden.has(name)) {
+                                    hidden.add(name);
+                                    return true;
+                                }
+                            }
+                            return false;
+                        };
+                        dropLastVisible();
+                        while (totalW() > avail && dropLastVisible()) {}
+                    }
+
+                    tabs.forEach(t => {
+                        const name = t.dataset.folder || '';
+                        t.style.display = hidden.has(name) ? 'none' : '';
+                    });
+
+                    dropdown.style.display = hidden.size > 0 ? '' : 'none';
+
+                    ddMenu.querySelectorAll('.dd-item').forEach(it => {
+                        const name = it.dataset.folder || '';
+                        it.style.display = hidden.has(name) ? '' : 'none';
+                    });
+                }
+
+                function updateTitle() {
+                    document.title = currentFolder || 'FISH ＜＞＜ GALLERY';
+                }
+
+                function refreshChrome() {
+                    updateTabs();
+                    updateTitle();
+                    layoutTabs();
+                }
+
+                function selectFolder(name) {
+                    if (name === currentFolder && allActive === (name === '')) return;
+                    currentFolder = name;
+                    allActive = name === '';
+                    preSearchFolder = null;
+                    refreshChrome();
+                    applyFilters();
+                    window.scrollTo({ top: 0 });
+                }
+
+                function goAll() {
+                    if (currentFolder === '') return;
+                    preSearchFolder = currentFolder;
+                    currentFolder = '';
+                    allActive = true;
+                    refreshChrome();
+                }
+
+                function restoreFolder() {
+                    if (preSearchFolder === null) return;
+                    currentFolder = preSearchFolder;
+                    preSearchFolder = null;
+                    allActive = false;
+                    refreshChrome();
+                }
+
+                let resizeTimer = null;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        layoutTabs();
+                        scheduleMasonry();
+                    }, 100);
+                });
+                window.addEventListener('load', () => {
+                    layoutTabs();
+                    scheduleMasonry();
+                });
+
+                const MASONRY_GAP = 10;
+                let masonryQueued = false;
+
+                function scheduleMasonry() {
+                    if (masonryQueued) return;
+                    masonryQueued = true;
+                    requestAnimationFrame(() => {
+                        masonryQueued = false;
+                        layoutMasonry();
+                    });
+                }
+
+                function layoutMasonry() {
+                    document.querySelectorAll('.grid').forEach(grid => {
+                        if (grid.classList.contains('collapsed') || !grid.offsetWidth) return;
+                        const minW = parseFloat(getComputedStyle(grid).getPropertyValue('--col-min')) || 180;
+                        const avail = grid.clientWidth;
+                        const cols = Math.max(1, Math.floor((avail + MASONRY_GAP) / (minW + MASONRY_GAP)));
+                        const colW = (avail - MASONRY_GAP * (cols - 1)) / cols;
+                        const heights = new Array(cols).fill(0);
+                        grid.querySelectorAll('.thumb').forEach(th => {
+                            if (th.style.display === 'none') return;
+                            const img = th.querySelector('img');
+                            const ratio = parseFloat(img.dataset.ratio) || 1;
+                            const h = (colW - 4) * ratio + 4;
+                            const col = heights.indexOf(Math.min(...heights));
+                            th.style.width = colW + 'px';
+                            th.style.height = h + 'px';
+                            th.style.transform = 'translate(' + (col * (colW + MASONRY_GAP)) + 'px, ' + heights[col] + 'px)';
+                            heights[col] += h + MASONRY_GAP;
+                        });
+                        grid.style.height = Math.max(0, ...heights) + 'px';
+                    });
+                }
+
+                function applyFilters() {
+                    const q = searchInput.value.trim().toLowerCase();
+                    const perFolder = new Map();
+                    let shown = 0;
+                    document.querySelectorAll('.folder-section').forEach(s => {
+                        const folderName = s.dataset.folder;
+                        const folderMatches = !!q && folderName.toLowerCase().includes(q);
+                        const matchFolder = !currentFolder || folderName === currentFolder;
+                        const thumbs = s.querySelectorAll('.thumb');
+                        let found = 0;
+                        thumbs.forEach(th => {
+                            const nameLower = th.dataset.name.toLowerCase();
+                            const matchSearch = !q || folderMatches || nameLower.includes(q);
+                            const show = matchFolder && matchSearch;
+                            th.style.display = show ? '' : 'none';
+                            if (show) found++;
+                        });
+                        perFolder.set(folderName, found);
+                        const countEl = s.querySelector('.count');
+                        countEl.textContent = (found < thumbs.length ? found + ' / ' : '') + thumbs.length + ' IMAGES';
+                        s.classList.toggle('search-hide', found === 0);
+                        if (found > 0) {
+                            shown += found;
+                            if (q || currentFolder) {
+                                const gridEl = s.querySelector('.grid');
+                                if (gridEl.classList.contains('collapsed')) {
+                                    gridEl.classList.remove('collapsed');
+                                    s.querySelector('.folder-header').setAttribute('aria-expanded', 'true');
+                                }
+                            }
+                        }
+                    });
+                    document.querySelectorAll('.tab, .dd-item').forEach(el => {
+                        const n = el.dataset.folder || '';
+                        const count = n ? perFolder.get(n) : (currentFolder ? 0 : allImgs.length);
+                        el.classList.toggle('dim', count === 0 && n !== currentFolder);
+                    });
+                    statusRight.textContent = shown === allImgs.length
+                        ? allImgs.length + ' IMAGES'
+                        : 'SHOWING ' + shown + ' / ' + allImgs.length;
+                    noResults.classList.toggle('visible', shown === 0);
+                    scheduleMasonry();
+                }
+
+                searchInput.addEventListener('input', () => {
+                    if (searchInput.value.trim()) goAll();
+                    else restoreFolder();
+                    applyFilters();
+                });
+                searchInput.addEventListener('keydown', e => {
+                    if (e.key === 'Escape') {
+                        searchInput.value = '';
+                        restoreFolder();
+                        applyFilters();
+                        searchInput.blur();
+                    }
+                });
+
+                let lbIdx = -1;
+                let lbToken = 0;
+                let lastFocused = null;
+                let zoom = 1;
+                let panX = 0;
+                let panY = 0;
+                let panId = null;
+                let panLastX = 0;
+                let panLastY = 0;
+                let pinchDist = null;
+                let pinchStartZoom = 1;
+
+                function applyZoom() {
+                    lbImg.style.transform = 'translate(' + panX + 'px, ' + panY + 'px) scale(' + zoom + ')';
+                    lb.classList.toggle('zoomed', zoom > 1);
+                }
+
+                function resetZoom() {
+                    zoom = 1;
+                    panX = 0;
+                    panY = 0;
+                    lbImg.style.transition = 'transform 0.15s ease';
+                    applyZoom();
+                }
+
+                function clampPan() {
+                    const rect = lbImgWrap.getBoundingClientRect();
+                    const maxX = Math.max(0, rect.width * (zoom - 1) / 2);
+                    const maxY = Math.max(0, rect.height * (zoom - 1) / 2);
+                    panX = Math.max(-maxX, Math.min(maxX, panX));
+                    panY = Math.max(-maxY, Math.min(maxY, panY));
+                }
+
+                function zoomAt(newZoom, cx, cy) {
+                    newZoom = Math.max(1, Math.min(20, newZoom));
+                    if (newZoom === zoom) return;
+                    const old = zoom;
+                    panX = panX + cx * (old - newZoom);
+                    panY = panY + cy * (old - newZoom);
+                    zoom = newZoom;
+                    if (zoom === 1) {
+                        panX = 0;
+                        panY = 0;
+                    } else {
+                        clampPan();
+                    }
+                    lbImg.style.transition = 'transform 0.15s ease';
+                    applyZoom();
+                }
+
+                function openLb(idx) {
+                    if (idx < 0 || idx >= allImgs.length) return;
+                    lbIdx = idx;
+                    const token = ++lbToken;
+                    const p = allImgs[idx];
+                    const url = enc(p.path) + '/' + enc(p.file);
+                    const ext = (p.file.split('.').pop() || '').toLowerCase();
+                    const isSvg = ext === 'svg';
+                    resetZoom();
+                    lbImg.style.width = '';
+                    lbImg.style.height = '';
+                    lbLoading.textContent = 'LOADING...';
+                    lbLoading.style.display = 'flex';
+                    lbImg.classList.remove('shown');
+                    lbImg.onload = () => {
+                        if (token === lbToken) {
+                            if (isSvg) fitSvg();
+                            lbLoading.style.display = 'none';
+                            lbImg.classList.add('shown');
+                        }
+                    };
+                    lbImg.onerror = () => {
+                        if (token === lbToken) {
+                            lbLoading.textContent = 'LOAD FAILED';
+                            lbLoading.style.display = 'flex';
+                        }
+                    };
+                    lbImg.src = url;
+                    lbImg.alt = p.file;
+                    lbName.textContent = p.folder + ' / ' + p.file;
+                    lbTag.textContent = (ext === 'svg' || ext === 'gif') ? ext.toUpperCase() : '';
+                    lbTag.className = (ext === 'svg' || ext === 'gif') ? ext : '';
+                    lbCount.textContent = (idx + 1) + ' / ' + allImgs.length;
+                    lbDl.href = url;
+                    lbDl.download = p.file;
+
+                    const inFrame = (window.self !== window.top);
+                    if (inFrame) {
+                        const h = Math.min(window.innerHeight, 900);
+                        lb.classList.add('framed');
+                        lb.style.top = window.scrollY + 'px';
+                        lb.style.height = h + 'px';
+                        lbImg.style.maxHeight = (h - 120) + 'px';
+                    } else {
+                        lb.classList.remove('framed');
+                        lb.style.top = '';
+                        lb.style.height = '';
+                        lbImg.style.maxHeight = '';
+                    }
+
+                    lb.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                    lastFocused = document.activeElement;
+                    lbClose.focus();
+                    preload(idx - 1);
+                    preload(idx + 1);
+                }
+
+                function preload(i) {
+                    if (i < 0 || i >= allImgs.length) return;
+                    const p = allImgs[i];
+                    const img = new Image();
+                    img.src = enc(p.path) + '/' + enc(p.file);
+                }
+
+                function fitSvg() {
+                    const maxW = Math.min(window.innerWidth * 0.85, 1400);
+                    const maxH = Math.max(300, lb.clientHeight - 120);
+                    const r = (lbImg.naturalHeight / lbImg.naturalWidth) || 1;
+                    let w = maxW;
+                    let h = w * r;
+                    if (h > maxH) {
+                        h = maxH;
+                        w = h / r;
+                    }
+                    lbImg.style.width = w + 'px';
+                    lbImg.style.height = h + 'px';
+                }
+
+                function closeLb() {
+                    lb.classList.remove('open');
+                    lbImg.classList.remove('shown');
+                    lbImg.src = '';
+                    lbToken++;
+                    lbLoading.textContent = 'LOADING...';
+                    lbLoading.style.display = 'none';
+                    document.body.style.overflow = '';
+                    if (lastFocused && lastFocused.focus) lastFocused.focus();
+                    lastFocused = null;
+                }
+
+                function navLb(d) {
+                    if (lbIdx < 0) return;
+                    openLb((lbIdx + d + allImgs.length) % allImgs.length);
+                }
+
+                lbClose.addEventListener('click', closeLb);
+                lbPrev.addEventListener('click', () => navLb(-1));
+                lbNext.addEventListener('click', () => navLb(1));
+                document.addEventListener('keydown', e => {
+                    if (!lb.classList.contains('open')) {
+                        if (e.key === 'Escape') closeMenu();
+                        if (e.key === '/' && document.activeElement !== searchInput) {
+                            e.preventDefault();
+                            searchInput.focus();
+                        }
+                        return;
+                    }
+                    if (e.key === 'Escape') {
+                        if (zoom > 1) resetZoom();
+                        else closeLb();
+                    } else if (e.key === 'ArrowLeft') navLb(-1);
+                    else if (e.key === 'ArrowRight') navLb(1);
+                    else if (e.key === '+' || e.key === '=') zoomAt(zoom * 1.5, 0, 0);
+                    else if (e.key === '-') { if (zoom > 1) zoomAt(zoom / 1.5, 0, 0); }
+                    else if (e.key === '0') resetZoom();
+                });
+                lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+
+                lb.addEventListener('keydown', e => {
+                    if (e.key !== 'Tab') return;
+                    const focusables = lb.querySelectorAll('button, a[href]');
+                    if (focusables.length === 0) return;
+                    const first = focusables[0];
+                    const last = focusables[focusables.length - 1];
+                    if (e.shiftKey && document.activeElement === first) {
+                        e.preventDefault();
+                        last.focus();
+                    } else if (!e.shiftKey && document.activeElement === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                });
+
+                let touchStartX = null;
+                let touchStartY = null;
+                lb.addEventListener('touchstart', e => {
+                    if (e.touches.length !== 1) { touchStartX = null; return; }
+                    if (e.target.closest('button, a')) { touchStartX = null; return; }
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                }, { passive: true });
+                lb.addEventListener('touchend', e => {
+                    if (touchStartX === null) return;
+                    const dx = e.changedTouches[0].clientX - touchStartX;
+                    const dy = e.changedTouches[0].clientY - touchStartY;
+                    touchStartX = null;
+                    if (zoom === 1 && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                        navLb(dx < 0 ? 1 : -1);
+                    }
+                }, { passive: true });
+
+                lb.addEventListener('wheel', e => {
+                    e.preventDefault();
+                    const rect = lbImgWrap.getBoundingClientRect();
+                    const cx = e.clientX - (rect.left + rect.width / 2);
+                    const cy = e.clientY - (rect.top + rect.height / 2);
+                    zoomAt(zoom * (e.deltaY < 0 ? 1.25 : 0.8), cx, cy);
+                }, { passive: false });
+
+                lb.addEventListener('dblclick', e => {
+                    if (e.target.closest('button, a')) return;
+                    const rect = lbImgWrap.getBoundingClientRect();
+                    const cx = e.clientX - (rect.left + rect.width / 2);
+                    const cy = e.clientY - (rect.top + rect.height / 2);
+                    if (zoom > 1) resetZoom();
+                    else zoomAt(2.5, cx, cy);
+                });
+
+                lbImg.addEventListener('pointerdown', e => {
+                    if (zoom <= 1) return;
+                    panId = e.pointerId;
+                    panLastX = e.clientX;
+                    panLastY = e.clientY;
+                    lbImg.style.transition = 'none';
+                    lbImg.setPointerCapture(e.pointerId);
+                    e.preventDefault();
+                });
+                lbImg.addEventListener('pointermove', e => {
+                    if (e.pointerId !== panId) return;
+                    panX += e.clientX - panLastX;
+                    panY += e.clientY - panLastY;
+                    panLastX = e.clientX;
+                    panLastY = e.clientY;
+                    clampPan();
+                    applyZoom();
+                });
+                lbImg.addEventListener('pointerup', e => {
+                    if (e.pointerId === panId) panId = null;
+                });
+                lbImg.addEventListener('pointercancel', e => {
+                    if (e.pointerId === panId) panId = null;
+                });
+
+                lb.addEventListener('touchstart', e => {
+                    if (e.touches.length === 2) {
+                        pinchDist = Math.hypot(
+                            e.touches[0].clientX - e.touches[1].clientX,
+                            e.touches[0].clientY - e.touches[1].clientY
+                        );
+                        pinchStartZoom = zoom;
+                        lbImg.style.transition = 'none';
+                    }
+                }, { passive: true });
+                lb.addEventListener('touchmove', e => {
+                    if (pinchDist === null || e.touches.length !== 2) return;
+                    e.preventDefault();
+                    const d = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    const rect = lbImgWrap.getBoundingClientRect();
+                    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - (rect.left + rect.width / 2);
+                    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - (rect.top + rect.height / 2);
+                    zoomAt(pinchStartZoom * (d / pinchDist), cx, cy);
+                }, { passive: false });
+                lb.addEventListener('touchend', e => {
+                    if (e.touches.length < 2) pinchDist = null;
+                }, { passive: true });
+
+                lbZoomIn.addEventListener('click', () => zoomAt(zoom * 1.5, 0, 0));
+                lbZoomOut.addEventListener('click', () => {
+                    if (zoom > 1) zoomAt(zoom / 1.5, 0, 0);
+                });
+
+                window.addEventListener('scroll', () => {
+                    backToTop.classList.toggle('visible', window.scrollY > 400);
+                });
+                backToTop.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                buildTabs();
+                refreshChrome();
+                applyFilters();
+            }
+        })();
+    </script>
+</body>
+</html>

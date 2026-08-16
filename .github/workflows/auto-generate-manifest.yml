@@ -1,0 +1,44 @@
+name: Auto-generate manifest
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: auto-generate-manifest
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          fetch-depth: 0
+
+      - name: Sync with remote
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase -X theirs origin main
+
+      - name: Remove DELETE_ files
+        run: find . -name 'DELETE_*' -not -path './.git/*' -delete
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: node scripts/generate-manifest.js
+
+      - name: Commit changes
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to manifest"
+          else
+            git commit -m "Auto-update manifest [skip ci]"
+            git push
+          fi

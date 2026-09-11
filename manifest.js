@@ -2162,8 +2162,9 @@ window.MANIFEST = {
         {
             "name": "ART GRAPHICS",
             "path": "ART GRAPHICS",
-            "count": 121,
+            "count": 122,
             "files": [
+                "9_11_aniversery_V2_w5i0.png",
                 "ALIVE_FISH.svg",
                 "ALIVE_FISH.png",
                 "AVIFAIR_LOGO.png",
@@ -2287,6 +2288,7 @@ window.MANIFEST = {
                 "tea_fish_logo.png"
             ],
             "sizes": [
+                4504935,
                 2273,
                 96984,
                 100696,

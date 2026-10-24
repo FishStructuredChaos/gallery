@@ -2814,14 +2814,16 @@ window.MANIFEST = {
         {
             "name": "VRC_RANDOM",
             "path": "VRC_RANDOM",
-            "count": 3,
+            "count": 4,
             "files": [
                 "Screenshot_2026-08-10_230751_jc0e.png",
+                "VRChat_2026-10-23_22-13-14_fjsj.png",
                 "image_2026-08-10_190750540_imx3.png",
                 "low_poly_kittysan_okbv.png"
             ],
             "sizes": [
                 626282,
+                491455,
                 203049,
                 956698
             ]

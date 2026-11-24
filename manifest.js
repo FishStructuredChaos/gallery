@@ -2520,12 +2520,13 @@ window.MANIFEST = {
         {
             "name": "RANDOM",
             "path": "RANDOM",
-            "count": 12,
+            "count": 13,
             "files": [
                 "IMG_1492_j69x.jpg",
                 "IMG_4362_txdw.jpg",
                 "IMG_5985_6x1u.jpg",
                 "KIDS_CHAIR_qm6e.png",
+                "MISSING_STONEY_v2fs.png",
                 "PAL_v105.png",
                 "baby_you_become_17qv.png",
                 "dogm_03ih.png",
@@ -2540,6 +2541,7 @@ window.MANIFEST = {
                 308626,
                 392020,
                 204482,
+                175674,
                 171082,
                 79738,
                 235310,

@@ -2421,7 +2421,7 @@ window.MANIFEST = {
         {
             "name": "POSTERS",
             "path": "POSTERS",
-            "count": 45,
+            "count": 46,
             "files": [
                 "BLOOMEY_1ST_POSTER.png",
                 "BLOOMEY_2ND_POSTER.png",
@@ -2442,6 +2442,7 @@ window.MANIFEST = {
                 "HT_JOIN_THE_FISH.png",
                 "INTERGALACTIC_KINGDOM_PROPAGANDA.png",
                 "KEYCHAIN.png",
+                "LumenSanturs_RuskPoster_TALL_mffr.png",
                 "MY_RESUME_2_5mie.png",
                 "POSTER_COCK.jpg",
                 "POSTER_EYE.jpg",
@@ -2489,6 +2490,7 @@ window.MANIFEST = {
                 3485204,
                 593710,
                 138917,
+                456350,
                 2622411,
                 248067,
                 333406,
